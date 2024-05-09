@@ -1,0 +1,67 @@
+  public void undo(){
+        // whatever you did while making the move, you need to reverse it
+        if(moves.isEmpty()){
+            System.out.println("Nothing to Undo!");
+            return;
+        }
+        Move lastMove = moves.get(moves.size()-1);
+        moves.remove(moves.size()-1);
+
+        lastMove.getCell().setCellState(CellState.EMPTY);
+        lastMove.getCell().getPlayer().setSymbol(null);
+
+        nextPlayerMoveIndex -= 1;
+        nextPlayerMoveIndex = (nextPlayerMoveIndex + players.size()) % players.size();
+
+        winningStrategy.handleUndo(board, lastMove);
+    }
+
+    public void handleUndo(Board board, Move move){
+            int row = move.getCell().getRow();
+            Map <Symbol, Integer> currentRow = rowMaps.get(row);
+            currentRow.put(move.getPlayer().getSymbol(), currentRow.get(move.getPlayer().getSymbol()) - 1);
+
+            int col = move.getCell().getCol();
+            Map < Symbol , Integer > currentCol = colMaps.get(col);
+            currentCol.put(move.getPlayer().getSymbol(), currentCol.get(move.getPlayer().getSymbol()) - 1);
+
+
+            if(row == col){
+                handleDiagonalUndo(move);
+
+                if(board.getDimension() %2 == 1 && (board.getDimension() -1)/2 == row) {
+                    handleAntiDiagonalUndo(move);
+                }
+            }
+
+            else if(row + col == board.getDimension()-1){
+                handleAntiDiagonalUndo(move);
+            }
+
+
+        }
+
+        private void handleAntiDiagonalUndo(Move move) {
+            rightDiagonalMap.put(move.getPlayer().getSymbol(), rightDiagonalMap.get(move.getPlayer().getSymbol()) - 1);
+        }
+
+        private void handleDiagonalUndo(Move move) {
+            leftDiagonalMap.put(move.getPlayer().getSymbol(), leftDiagonalMap.get(move.getPlayer().getSymbol()) - 1);
+        }
+
+
+        ///client.java
+        import java.util.Scanner;
+
+         Scanner sc = new Scanner(System.in);
+
+
+
+          System.out.println("Anyone wants to Undo ???? (Y/N)");
+                    String x = sc.next();
+                    if(x.equals("Y")){
+                        gameController.undo(game);
+                        game.setGameState(GameState.IN_PROGRESS);
+                        System.out.println("After UNDO : ");
+                        gameController.displayBoard(game);
+                    }
