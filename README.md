@@ -1,2 +1,2 @@
 # Case-Study-TicTacToe
-This game can be played via ouput console
+This game can be played via console
